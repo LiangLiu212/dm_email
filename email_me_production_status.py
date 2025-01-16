@@ -270,7 +270,7 @@ def write_the_message(manager, xml, project, stage, defs, inputdef, campaign_sta
 	    text, html, message_code=write_message_running(manager, defs, inputdef, input_total, input_merging, output_total, output_merging, difference, check_input_results, completeness, sum_output_merging)
 	    return text, html, message_code
 	else:
-	    change_campaign_status(project, campaign_status, "merging")
+	    change_campaign_status(project, stage, campaign_status, "merging")
 	    exit(0)
 
     elif campaign_status == 'merging':
@@ -305,16 +305,16 @@ def write_the_message(manager, xml, project, stage, defs, inputdef, campaign_sta
 		    print(parents_files)
 		    print(parents_events)
 	    
-	    campaign_complete = True
+	    campaign_complete = False
 	    for i in range(len(output_files)):
-		if float(output_files[i])/float(input_files) < 0.95 or float(output_events[i])/float(input_events) < 0.95:
-		    campaign_complete = False
+		if float(output_files[i])/float(input_files) > 0.945 or float(output_events[i])/float(input_events) > 0.945:
+		    campaign_complete = True
 		
 	    if campaign_complete:
-		change_campaign_status(project, campaign_status, "complete")
+		change_campaign_status(project, stage, campaign_status, "complete")
 	        exit(0)
 	    else:
-	        change_campaign_status(project, campaign_status, "makeups") # info manager to submit makeups; makeups need to adjust the resource of computing
+	        change_campaign_status(project, stage, campaign_status, "makeups") # info manager to submit makeups; makeups need to adjust the resource of computing
 	        exit(0)
 
 
@@ -350,18 +350,26 @@ def write_the_message(manager, xml, project, stage, defs, inputdef, campaign_sta
                     elif 'Parents:' in line:
                         parents_files.append(line.split()[1])
                         parents_events.append(line.split()[2])
-    
-                campaign_complete = True
+                print(input_files)
+                print(input_events)
+                print(output_files)
+                print(output_events)
+                print(parents_files)
+                print(parents_events)
+
+                campaign_complete = False
                 for i in range(len(output_files)):
-                    if float(output_files[i])/float(input_files) < 0.95 or float(output_events[i])/float(input_events) < 0.95:
-                        campaign_complete = False
+                    if float(output_files[i])/float(input_files) > 0.945 or float(output_events[i])/float(input_events) > 0.945:
+                        campaign_complete = True
     
                 if campaign_complete:
-                    change_campaign_status(project, campaign_status, "complete")
+                    change_campaign_status(project, stage, campaign_status, "complete")
 	    	    exit(0)
                 else:
-                    change_campaign_status(project, campaign_status, "makeups") # info manager to submit makeups; makeups need to adjust the resource of computing   
-	    	    exit(0)
+                    #change_campaign_status(project, campaign_status, "makeups") # info manager to submit makeups; makeups need to adjust the resource of computing   
+                    text, html, message_code=write_message_makeups_reminder(manager, defs, inputdef, input_total, input_merging, output_total, output_merging, difference, check_input_results, completeness, sum_output_merging)
+                    return text, html, message_code
+	    	    #exit(0)
 
     elif campaign_status == 'complete':
 	text, html, message_code=write_message_complete(manager, defs, inputdef, input_total, input_merging, output_total, output_merging, difference, check_input_results, completeness, sum_output_merging)
@@ -370,7 +378,7 @@ def write_the_message(manager, xml, project, stage, defs, inputdef, campaign_sta
 
 def setup_project(project, stage):
     print(project)
-    is_project_in_email_pool = check_xml.find_string_in_files("/exp/uboone/app/home/uboonepro/liangliu/email/email.sh", project)
+    is_project_in_email_pool = check_xml.find_string_in_files("/exp/uboone/app/home/uboonepro/liangliu/email/email.sh", project, stage)
     file_path = check_xml.find_string_in_path("/exp/uboone/app/home/uboonepro/xml/", project)
     if len(file_path) == 0:
 	print("Cannot find project : \033[0;31m" + project +"\033[0m")
@@ -400,27 +408,27 @@ def setup_project(project, stage):
     return command
 
 
-def removal_from_email_pool(project):
+def removal_from_email_pool(project, stage):
     file_path = "/exp/uboone/app/home/uboonepro/liangliu/email/email.sh"
     try:
 	with open(file_path, 'r') as f:
 	    lines = f.readlines()
 	for line in lines:
-	    if project in line:
-	        check_xml.find_and_replace_or_add_line(file_path, project, "#"+line)
+	    if project in line and stage in line:
+	        check_xml.find_and_replace_or_add_line(file_path, project, stage, "#"+line)
     except (IOError, UnicodeDecodeError):
 	exit(3)
 
 
-def change_campaign_status(project, old_status, new_status):
+def change_campaign_status(project, stage, old_status, new_status):
     file_path = "/exp/uboone/app/home/uboonepro/liangliu/email/email.sh"
     try:
 	with open(file_path, 'r') as f:
 	    lines = f.readlines()
 	for line in lines:
-	    if project in line:
+	    if project in line and stage in line:
 		new_cmd = line.replace(old_status, new_status)
-	        check_xml.find_and_replace_or_add_line(file_path, project, new_cmd)
+	        check_xml.find_and_replace_or_add_line(file_path, project, stage, new_cmd)
 		os.system(new_cmd + "> /dev/null")
     except (IOError, UnicodeDecodeError):
 	exit(3)
@@ -482,7 +490,7 @@ def main(argv):
 	cmd=setup_project(project, stage)
         command='/exp/uboone/app/home/uboonepro/liangliu/email/email_me_production_status.py --manager "' + manager + '" --email ' + email + ' --defs ' + defs + cmd
 	print(command) 
-	check_xml.find_and_replace_or_add_line("/exp/uboone/app/home/uboonepro/liangliu/email/email.sh", project, command)
+	check_xml.find_and_replace_or_add_line("/exp/uboone/app/home/uboonepro/liangliu/email/email.sh", project, stage, command)
 	os.system(command + " > /dev/null")
 	exit(0)
 
@@ -491,7 +499,7 @@ def main(argv):
     if status != 0:
 	print(argv)
     elif status == 0:
-	removal_from_email_pool(project)
+	removal_from_email_pool(project, stage)
     exit(0)
 
     #if int(input_merging) != 0:

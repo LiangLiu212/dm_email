@@ -18,6 +18,20 @@ def find_string_in_files(file_path, search_string):
         exit(-1)
 
 
+def find_string_in_files(file_path, search_string, stage_string):
+    #print(file_path)
+    try:
+        with open(file_path, 'r') as f:
+            for line_number, line in enumerate(f, start=1):
+                if search_string in line and stage_string in line:
+                    print("Found in {} on line {}: {}".format(file_path, line_number, line.strip()))
+                    return 0
+    except (IOError, UnicodeDecodeError):
+        # Skip files that cannot be opened or decoded
+        exit(-1)
+
+
+
 
 
 def find_string_in_path(path, search_string):
@@ -37,7 +51,7 @@ def find_string_in_path(path, search_string):
                     continue
     return ""
 
-def find_and_replace_or_add_line(path, search_string, new_line):
+def find_and_replace_or_add_line(path, search_string, stage_string, new_line):
     file_path = path
     try:
         # Read the file content
@@ -48,7 +62,7 @@ def find_and_replace_or_add_line(path, search_string, new_line):
         found = False
         with open(file_path, 'w') as f:
             for line in lines:
-                if search_string in line:
+                if search_string in line and stage_string in line:
                     f.write(new_line + '\n')
                     found = True
                 else:
