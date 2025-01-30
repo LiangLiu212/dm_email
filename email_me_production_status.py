@@ -178,6 +178,7 @@ def write_message_complete(manager, defs, inputdef, input_total, input_merging, 
     text+="Campaign Complete! \n"
     text+="Your job is " + str(completeness) + "% complete!  \n"
     text+="Please post output definition to the spreadsheet! \n"
+
     text+="Files in output definition : " + "\n"
     for i in range(len(output_total)):
         text+="    " + str(output_total[i]) + " files in " + defs.split(",")[i] + "\n"
@@ -190,18 +191,43 @@ def write_message_complete(manager, defs, inputdef, input_total, input_merging, 
         text+=line + "\n"
     #print(text)
 
+    output_files = []
+    output_events = []
+    parents_files = []
+    parents_events = []
+    for line in check_defs_output.split("\n"):
+        if 'Input:' in line:
+            input_files = line.split()[1]
+            input_events = line.split()[2]
+        elif 'Output:' in line:
+            output_files.append(line.split()[1])
+            output_events.append(line.split()[2])
+        elif 'Parents:' in line:
+            parents_files.append(line.split()[1])
+            parents_events.append(line.split()[2])
 
     html+="""<p style="color: black;">Hi """ + manager + """ </p>"""
     html+="""<h2 style="color: red;">Complete! </h2>"""
     html+="""<p style="color: black;">Your job is """ + str(completeness) + """% complete! </p>"""
-    html+="""<p style="color: red;">Please post output definition to the spreadsheet! </p>"""
-    html+="""<p style="color: black;">Files in output definition : """ + """</p>"""
+    html+="""<p style="color: red;">Please post output definition to the <a href="https://docs.google.com/spreadsheets/d/12Kd2GsfRDqKliq6KT2xAyzqiYpNyYWqpV3gih4Ee01s/edit?gid=972888436#gid=972888436">DM Campaign Spreadsheet</a>!</p>"""
+
+    html+="""<table><tr><th>Input definition</th><td>""" +inputdef+ """</td></tr>"""
+    html+="""<tr><th>Files in definition</th><td>""" +str(int(input_total))+ """</td></tr>"""
+    html+="""<tr><th>Events in definition</th><td>""" + str(input_events) +"""</td></tr></table>"""
+    html+="""<tr><th>Submitted files</th><td>""" + str(int(input_total) - int(difference)) +"""</td></tr>"""
+    html+="""<table><thead><tr><th>Output definition</th><th>Output files</th><th>Output events</th></thead><tbody>"""
     for i in range(len(output_total)):
-        html+="""<p style="color: black;">    """ + str(output_total[i]) + """ files in """ + defs.split(",")[i] + """</p>"""
-        html+="""<p style="color: limegreen;">    """ + str(output_merging[i]) + """ files in merging pool.""" + """</p>"""
-    html+="""<p style="color: black;">Total input files      : """ + str(input_total) + """ in input definition """ + inputdef + """</p>"""
-    html+="""<p style="color: black;">Submited files         : """ + str(int(input_total) - int(difference)) + """</p>"""
-    html+="""<p style="color: black;">Files in waiting pool  : """ + str(difference) + """</p>"""
+        html+="""<tr>"""
+        html+="""<td>"""+defs.split(",")[i]+"""</td>"""
+        html+="""<td>"""+str(output_files[i])+"""</td>"""
+        html+="""<td>"""+str(output_events[i])+"""</td>"""
+        html+="""</tr>"""
+    html+="""</tbody></table>"""
+
+    html+="""<p><a href="https://docs.google.com/spreadsheets/d/12Kd2GsfRDqKliq6KT2xAyzqiYpNyYWqpV3gih4Ee01s/edit?gid=972888436#gid=972888436">DM Campaign Spreadsheet</a></p>"""
+    html+="""<p><a href="https://pomsgpvm02.fnal.gov/poms/index/uboone/production">POMS</a></p>"""
+
+
     html+="""<h2 style="color: blue;">check_def.sh output! </h2>"""
     for line in check_defs_output.split("\n"):
         if line[4:7] == '32m':
@@ -242,7 +268,24 @@ def write_message_makeups(manager, defs, inputdef, input_total, input_merging, o
     html+="""<p style="color: black;">Hi """ + manager + """ </p>"""
     html+="""<h2 style="color: mediumpurple;">Campaign Makeups Running! </h2>"""
     html+="""<p style="color: black;">Your job is """ + str(completeness) + """% complete! </p>"""
-    html+="""<p style="color: red;">Please go to the page of your campaign to stop the submission. (Please ignore if you have stopped the submission)</p>"""
+    html+="""<p style="color: red;">Please go to the page of your campaign in <a href="https://pomsgpvm02.fnal.gov/poms/index/uboone/production">POMS</a> to stop the submission. (Please ignore if you have stopped the submission)</p>"""
+
+    html+="""<table><tr><th>Input definition</th><td>""" +inputdef+ """</td></tr>"""
+    html+="""<tr><th>Files in definition</th><td>""" +str(int(input_total))+ """</td></tr>"""
+    html+="""<tr><th>Submitted files</th><td>""" + str(int(input_total) - int(difference)) +"""</td></tr>"""
+    html+="""<tr><th>Waiting files</th><td>""" + str(difference) +"""</td></tr></table>"""
+    html+="""<table><thead><tr><th>Output definition</th><th>Files in definition</th><th>Files in merging pool</th></thead><tbody>"""
+    for i in range(len(output_total)):
+        html+="""<tr>"""
+        html+="""<td>"""+defs.split(",")[i]+"""</td>"""
+        html+="""<td>"""+str(output_total[i])+"""</td>"""
+        html+="""<td>"""+str(output_merging[i])+"""</td>"""
+        html+="""</tr>"""
+    html+="""</tbody></table>"""
+    html+="""<p><a href="https://docs.google.com/spreadsheets/d/12Kd2GsfRDqKliq6KT2xAyzqiYpNyYWqpV3gih4Ee01s/edit?gid=972888436#gid=972888436">DM Campaign Spreadsheet</a></p>"""
+    html+="""<p><a href="https://pomsgpvm02.fnal.gov/poms/index/uboone/production">POMS</a></p>"""
+
+
     html+="""<p style="color: black;">Files in output definition : """ + """</p>"""
     for i in range(len(output_total)):
         html+="""<p style="color: black;">    """ + str(output_total[i]) + """ files in """ + defs.split(",")[i] + """</p>"""
@@ -267,6 +310,8 @@ def write_message_makeups_reminder(manager, defs, inputdef, input_total, input_m
     text+="Campaign Makeups Needed! \n"
     text+="Your job is " + str(completeness) + "% complete!  \n"
     text+="Please go to the page of your campaign to stop the submission. (Please ignore if you have stopped the submission)\n"
+
+
     text+="Files in output definition : " + "\n"
     for i in range(len(output_total)):
         text+="    " + str(output_total[i]) + " files in " + defs.split(",")[i] + "\n"
@@ -281,7 +326,23 @@ def write_message_makeups_reminder(manager, defs, inputdef, input_total, input_m
     html+="""<p style="color: black;">Hi """ + manager + """ </p>"""
     html+="""<h2 style="color: mediumvioletred;">Campaign Makeups Needed! </h2>"""
     html+="""<p style="color: black;">Your job is """ + str(completeness) + """% complete! </p>"""
-    html+="""<p style="color: red;">Please go to the page of your campaign to stop the submission. (Please ignore if you have stopped the submission)</p>"""
+    html+="""<p style="color: red;">Please go to the page of your campaign in <a href="https://pomsgpvm02.fnal.gov/poms/index/uboone/production">POMS</a> to stop the submission. (Please ignore if you have stopped the submission)</p>"""
+
+    html+="""<table><tr><th>Input definition</th><td>""" +inputdef+ """</td></tr>"""
+    html+="""<tr><th>Files in definition</th><td>""" +str(int(input_total))+ """</td></tr>"""
+    html+="""<tr><th>Submitted files</th><td>""" + str(int(input_total) - int(difference)) +"""</td></tr>"""
+    html+="""<tr><th>Waiting files</th><td>""" + str(difference) +"""</td></tr></table>"""
+    html+="""<table><thead><tr><th>Output definition</th><th>Files in definition</th><th>Files in merging pool</th></thead><tbody>"""
+    for i in range(len(output_total)):
+        html+="""<tr>"""
+        html+="""<td>"""+defs.split(",")[i]+"""</td>"""
+        html+="""<td>"""+str(output_total[i])+"""</td>"""
+        html+="""<td>"""+str(output_merging[i])+"""</td>"""
+        html+="""</tr>"""
+    html+="""</tbody></table>"""
+    html+="""<p><a href="https://docs.google.com/spreadsheets/d/12Kd2GsfRDqKliq6KT2xAyzqiYpNyYWqpV3gih4Ee01s/edit?gid=972888436#gid=972888436">DM Campaign Spreadsheet</a></p>"""
+    html+="""<p><a href="https://pomsgpvm02.fnal.gov/poms/index/uboone/production">POMS</a></p>"""
+
     html+="""<p style="color: black;">Files in output definition : """ + """</p>"""
     for i in range(len(output_total)):
         html+="""<p style="color: black;">    """ + str(output_total[i]) + """ files in """ + defs.split(",")[i] + """</p>"""
