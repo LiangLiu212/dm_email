@@ -49,7 +49,7 @@ def email_me_production_status(email, text, html, project):
 
 def write_message_running(manager, defs, inputdef, input_total, input_merging, output_total, output_merging, difference, check_input_results, completeness, sum_output_merging):
     text=""
-    html="<html><head></head><body>"
+    html="""<html><head></head><body>"""
     # Running status
 
     text+="Hi " + manager + "\n"
@@ -58,6 +58,17 @@ def write_message_running(manager, defs, inputdef, input_total, input_merging, o
     text+="Total input files      : " + str(input_total) + " in input definition " + inputdef + "\n"
     text+="Submited files         : " + str(int(input_total) - int(difference)) + "\n"
     text+="Files in waiting pool  : " + str(difference) + "\n"
+
+    # make a table to summary 
+    text+="Output definition " + "\n"
+    text+="files in definition " + "\n"
+    text+="files in merging pool " + "\n"
+    
+    for i in range(len(output_total)):
+        text+=defs.split(",")[i] + "\n"
+        text+=str(output_total[i]) + "\n"
+        text+=str(output_merging[i]) + "\n"
+
     text+="Files in output definition : " + "\n"
     for i in range(len(output_total)):
         text+="    " + str(output_total[i]) + " files in " + defs.split(",")[i] + "\n"
@@ -68,9 +79,23 @@ def write_message_running(manager, defs, inputdef, input_total, input_merging, o
     html+="""<p style="color: black;">Hi """ + manager + """ </p>"""
     html+="""<h2 style="color: green;">Campaign Running! </h2>"""
     html+="""<p style="color: black;">Your job is """ + str(completeness) + """% complete! </p>"""
-    html+="""<p style="color: black;">Total input files      : """ + str(input_total) + """ in input definitio """ + inputdef + """</p>"""
-    html+="""<p style="color: black;">Submited files         : """ + str(int(input_total) - int(difference)) + """</p>"""
-    html+="""<p style="color: black;">Files in waiting pool  : """ + str(difference) + """</p>"""
+
+    html+="""<table><tr><th>Input definition</th><td>""" +inputdef+ """</td></tr>"""
+    html+="""<tr><th>Files in definition</th><td>""" +str(int(input_total))+ """</td></tr>"""
+    html+="""<tr><th>Submitted files</th><td>""" + str(int(input_total) - int(difference)) +"""</td></tr>"""
+    html+="""<tr><th>Waiting files</th><td>""" + str(difference) +"""</td></tr></table>"""
+    html+="""<table><thead><tr><th>Output definition</th><th>Files in definition</th><th>Files in merging pool</th></thead><tbody>"""
+    for i in range(len(output_total)):
+        html+="""<tr>"""
+        html+="""<td>"""+defs.split(",")[i]+"""</td>"""
+        html+="""<td>"""+str(output_total[i])+"""</td>"""
+        html+="""<td>"""+str(output_merging[i])+"""</td>"""
+        html+="""</tr>"""
+    html+="""</tbody></table>"""
+
+    html+="""<p><a href="https://docs.google.com/spreadsheets/d/12Kd2GsfRDqKliq6KT2xAyzqiYpNyYWqpV3gih4Ee01s/edit?gid=972888436#gid=972888436">DM Campaign Spreadsheet</a></p>"""
+    html+="""<p><a href="https://pomsgpvm02.fnal.gov/poms/index/uboone/production">POMS</a></p>"""
+
     html+="""<p style="color: black;">Files in output definition : """ + """</p>"""
     for i in range(len(output_total)):
         html+="""<p style="color: black;">    """ + str(output_total[i]) + """ files in """ + defs.split(",")[i] + """</p>"""
@@ -91,6 +116,7 @@ def write_message_merging(manager, defs, inputdef, input_total, input_merging, o
     text+="Campaign Merging! \n"
     text+="Your job is " + str(completeness) + "% complete!  \n"
     text+="Please go to the page of your campaign to stop the submission. (Please ignore if you have stopped the submission)\n"
+
     text+="Files in output definition : " + "\n"
     for i in range(len(output_total)):
         text+="    " + str(output_total[i]) + " files in " + defs.split(",")[i] + "\n"
@@ -105,7 +131,26 @@ def write_message_merging(manager, defs, inputdef, input_total, input_merging, o
     html+="""<p style="color: black;">Hi """ + manager + """ </p>"""
     html+="""<h2 style="color: limegreen;">Campaign Merging! </h2>"""
     html+="""<p style="color: black;">Your job is """ + str(completeness) + """% complete! </p>"""
-    html+="""<p style="color: red;">Please go to the page of your campaign to stop the submission. (Please ignore if you have stopped the submission)</p>"""
+    html+="""<p style="color: red;">Please go to the page of your campaign in <a href="https://pomsgpvm02.fnal.gov/poms/index/uboone/production">POMS</a> to stop the submission. (Please ignore if you have stopped the submission)</p>"""
+
+
+    html+="""<table><tr><th>Input definition</th><td>""" +inputdef+ """</td></tr>"""
+    html+="""<tr><th>Files in definition</th><td>""" +str(int(input_total))+ """</td></tr>"""
+    html+="""<tr><th>Submitted files</th><td>""" + str(int(input_total) - int(difference)) +"""</td></tr>"""
+    html+="""<tr><th>Waiting files</th><td>""" + str(difference) +"""</td></tr></table>"""
+    html+="""<table><thead><tr><th>Output definition</th><th>Files in definition</th><th>Files in merging pool</th></thead><tbody>"""
+    for i in range(len(output_total)):
+        html+="""<tr>"""
+        html+="""<td>"""+defs.split(",")[i]+"""</td>"""
+        html+="""<td>"""+str(output_total[i])+"""</td>"""
+        html+="""<td>"""+str(output_merging[i])+"""</td>"""
+        html+="""</tr>"""
+    html+="""</tbody></table>"""
+    html+="""<p><a href="https://docs.google.com/spreadsheets/d/12Kd2GsfRDqKliq6KT2xAyzqiYpNyYWqpV3gih4Ee01s/edit?gid=972888436#gid=972888436">DM Campaign Spreadsheet</a></p>"""
+    html+="""<p><a href="https://pomsgpvm02.fnal.gov/poms/index/uboone/production">POMS</a></p>"""
+
+
+
     html+="""<p style="color: black;">Files in output definition : """ + """</p>"""
     for i in range(len(output_total)):
         html+="""<p style="color: black;">    """ + str(output_total[i]) + """ files in """ + defs.split(",")[i] + """</p>"""
